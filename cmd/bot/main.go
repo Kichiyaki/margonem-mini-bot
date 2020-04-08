@@ -38,8 +38,12 @@ type config struct {
 }
 
 func main() {
+	basePath := "./"
+	if Mode == "development" {
+		basePath = "./../../"
+	}
 	logrus.SetOutput(&lumberjack.Logger{
-		Filename:   "./logs/bot.log",
+		Filename:   basePath + "logs/bot.log",
 		MaxSize:    5, // megabytes
 		MaxBackups: 3,
 		MaxAge:     1, //days
@@ -53,7 +57,7 @@ func main() {
 			logrus.Fatal(fmt.Errorf("Wrong machine id"))
 		}
 	}
-	dat, err := ioutil.ReadFile("config.json")
+	dat, err := ioutil.ReadFile(basePath + "config.json")
 	if err != nil {
 		logrus.Fatalf("Cannot load config file: %s", err)
 	}

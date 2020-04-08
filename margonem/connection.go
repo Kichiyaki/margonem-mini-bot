@@ -35,6 +35,7 @@ type Connection interface {
 	Charlist() []*Character
 	UseWholeStamina(charid string, mapid string) error
 	UserID() string
+	Maplist() (map[string]*Map, error)
 }
 
 type connection struct {
@@ -125,6 +126,26 @@ func (c *connection) UseWholeStamina(charid string, mapid string) error {
 	entry.Debug("UseWholeStamina finished")
 
 	return nil
+}
+
+func (c *connection) Maplist() (map[string]*Map, error) {
+	character := c.charlist[0]
+	_logrus.Debug("Maplist called")
+	serverConn := &serverConnection{
+		collector: c.collector.Clone(),
+		headers:   c.headers.Clone(),
+		charID:    character.ID,
+		userID:    c.UserID(),
+		server:    character.Server(),
+	}
+	if err := serverConn.init(); err != nil {
+		_logrus.Debugf("Maplist err: %s", err.Error())
+		return nil, err
+	}
+	maps := serverConn.maps
+	serverConn.close()
+	_logrus.Debug("Maplist finished")
+	return maps, nil
 }
 
 func (c *connection) findCharacterByID(charid string) (*Character, error) {
