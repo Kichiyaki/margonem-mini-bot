@@ -70,7 +70,7 @@ func main() {
 
 	c := cron.New(cron.WithChain(
 		cron.SkipIfStillRunning(cron.VerbosePrintfLogger(log.New(os.Stdout, "cron: ", log.LstdFlags)))))
-	c.AddFunc("* * * * *", func() {
+	c.AddFunc("5 * * * *", func() {
 		var wg sync.WaitGroup
 		limit := runtime.NumCPU() * 10
 		count := 0

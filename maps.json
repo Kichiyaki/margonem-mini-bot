@@ -1,0 +1,257 @@
+{
+  "2675": {
+    "name": "Leśny Gąszcz [1-5]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2676": {
+    "name": "Zaginiony Matecznik [6-10]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2677": {
+    "name": "Rozstaje Dróg [11-15]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2794": {
+    "name": "Dziewicza Knieja [16-20]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2795": {
+    "name": "Głęboki Rozłóg [21-25]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2796": {
+    "name": "Osada Zulusów [26-30]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2797": {
+    "name": "Siedziba Rozbójników [31-35]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2798": {
+    "name": "Wioska Ghuli [36-40]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2799": {
+    "name": "Orczy Bastion [41-45]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2800": {
+    "name": "Wymarły Las [46-50]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2801": {
+    "name": "Jaskinia Koboldów [51-55]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2802": {
+    "name": "Grota Olbrzymów [56-60]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2803": {
+    "name": "Pieczara Nieumarłych [61-65]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2804": {
+    "name": "Wioska Gnolli [66-70]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2805": {
+    "name": "Złowieszcze Moczary [71-75]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2806": {
+    "name": "Magazyn Andarum [76-80]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2807": {
+    "name": "Opuszczona Krypta [81-85]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2808": {
+    "name": "Andarum Ilami [86-90]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2809": {
+    "name": "Kryjówka Bandytów [91-95]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2810": {
+    "name": "Las Centaurów [96-100]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2829": {
+    "name": "Lodowa Jaskinia [101-105]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2830": {
+    "name": "Leże Hydr [106-110]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2831": {
+    "name": "Przeklęta Pustynia [111-115]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2832": {
+    "name": "Przełęcz Górali [116-120]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2833": {
+    "name": "Żywe Wydmy [121-125]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2834": {
+    "name": "Pustynne Piekło [126-130]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2835": {
+    "name": "Orcza Kopalnia [131-135]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2836": {
+    "name": "Twierdza Barbarzyńców [136-140]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2837": {
+    "name": "Gliniana Jaskinia [141-145]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2838": {
+    "name": "Goblińska Pieczara [146-150]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2839": {
+    "name": "Wioska Orków [151-155]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2840": {
+    "name": "Leśna Forteca [156-160]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2841": {
+    "name": "Przeklęta Kotlina [161-165]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2842": {
+    "name": "Twierdza Czarnej Gwardii [166-170]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2843": {
+    "name": "Las Driad [171-175]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2844": {
+    "name": "Las Furboli [176-180]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2845": {
+    "name": "Krypty Możnych [181-185]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2846": {
+    "name": "Wioska Draków [186-190]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2847": {
+    "name": "Kanały Myszwiorów [191-195]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2848": {
+    "name": "Jaskinie Ofiary [196-200]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2849": {
+    "name": "Podziemia Heretyków [201-205]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2850": {
+    "name": "Pajęcze Ścieki [206-210]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2851": {
+    "name": "Piaskowe Dorzecze [211-215]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2852": {
+    "name": "Zacisze Maddoków [216-220]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2853": {
+    "name": "Skryty Wodospad [221-225]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2854": {
+    "name": "Antyczna Równina [226-230]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2855": {
+    "name": "Zapomniany Przesmyk [231-235]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2856": {
+    "name": "Dzika Przełęcz [236-240]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2857": {
+    "name": "Dzika Przełęcz II [241-245]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2858": {
+    "name": "Osada Dzikich [246-250]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  },
+  "2859": {
+    "name": "Osada Dzikich II [251-255]",
+    "stamina_cost_fight": 1,
+    "stamina_cost_boss": 1
+  }
+}

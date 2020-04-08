@@ -71,6 +71,6 @@ func main() {
 			logrus.Fatal(err)
 		}
 		jsonString, _ := json.Marshal(maps)
-		ioutil.WriteFile("maps.json", jsonString, os.ModePerm)
+		ioutil.WriteFile(basePath+"maps.json", jsonString, os.ModePerm)
 	}
 }
