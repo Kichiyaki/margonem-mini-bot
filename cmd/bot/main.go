@@ -2,17 +2,16 @@ package main
 
 import (
 	"bot/margonem"
+	"bot/utils"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"os"
 	"os/signal"
+	"runtime"
+	"sync"
 	"syscall"
 	"time"
-
-	"github.com/denisbrodbeck/machineid"
 
 	"github.com/robfig/cron/v3"
 
@@ -22,7 +21,7 @@ import (
 )
 
 var Mode = "development"
-var MachineID = ""
+var MachineID = "*"
 
 type config struct {
 	Accounts []struct {
@@ -48,15 +47,11 @@ func main() {
 		MaxBackups: 3,
 		MaxAge:     1, //days
 	})
-	if Mode != "development" {
-		id, err := machineid.ProtectedID("margonem-mobile-app-bot")
-		if err != nil {
-			logrus.Fatal(err)
-		}
-		if id != MachineID {
-			logrus.Fatal(fmt.Errorf("Wrong machine id"))
-		}
+
+	if err := utils.CheckMachineID(MachineID); err != nil {
+		logrus.Fatal(err)
 	}
+
 	dat, err := ioutil.ReadFile(basePath + "config.json")
 	if err != nil {
 		logrus.Fatalf("Cannot load config file: %s", err)
@@ -76,38 +71,47 @@ func main() {
 	c := cron.New(cron.WithChain(
 		cron.SkipIfStillRunning(cron.VerbosePrintfLogger(log.New(os.Stdout, "cron: ", log.LstdFlags)))))
 	c.AddFunc("* * * * *", func() {
+		var wg sync.WaitGroup
+		limit := runtime.NumCPU() * 10
+		count := 0
 		for _, account := range cfg.Accounts {
+			if count >= limit {
+				wg.Wait()
+				count = 0
+			}
 			if len(account.Characters) > 0 {
-				conn, err := margonem.Connect(&margonem.Config{
-					Username: account.Username,
-					Password: account.Password,
-					Proxy:    account.Proxy,
-				})
-				if err != nil {
-					continue
-				}
-				for _, char := range account.Characters {
-					entry := logrus.WithField("charid", char.ID).WithField("mapid", char.MapID)
-					entry.Info("Running cron job")
-					time.Sleep(time.Duration(random(200, 400)) * time.Millisecond)
-					err := conn.UseWholeStamina(char.ID, char.MapID)
-					entry.WithField("err", err).Info("Finished cron job")
-				}
+				go func() {
+					wg.Add(1)
+					defer wg.Done()
+					count++
+					conn, err := margonem.Connect(&margonem.Config{
+						Username: account.Username,
+						Password: account.Password,
+						Proxy:    account.Proxy,
+					})
+					if err != nil {
+						return
+					}
+					for _, char := range account.Characters {
+						entry := logrus.WithField("charid", char.ID).WithField("mapid", char.MapID)
+						entry.Info("Running cron job")
+						time.Sleep(time.Duration(utils.Random(200, 400)) * time.Millisecond)
+						err := conn.UseWholeStamina(char.ID, char.MapID)
+						entry.WithField("err", err).Info("Finished cron job")
+					}
+				}()
 			}
 		}
+
+		wg.Wait()
 	})
 	c.Start()
 	defer c.Stop()
+	log.Print("Uruchomiono bota.")
 
 	channel := make(chan os.Signal, 1)
 	signal.Notify(channel, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGINT)
 	<-channel
 
 	os.Exit(0)
-}
-
-func random(min, max int) int {
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	return r1.Intn(max-min) + min
 }

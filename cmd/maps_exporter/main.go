@@ -2,13 +2,11 @@ package main
 
 import (
 	"bot/margonem"
+	"bot/utils"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-
-	"github.com/denisbrodbeck/machineid"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 
@@ -16,17 +14,13 @@ import (
 )
 
 var Mode = "development"
-var MachineID = ""
+var MachineID = "*"
 
 type config struct {
 	Accounts []struct {
-		Username   string `json:"username"`
-		Password   string `json:"password"`
-		Proxy      string `json:"proxy"`
-		Characters []struct {
-			ID    string `json:"id"`
-			MapID string `json:"map_id"`
-		} `json:"characters"`
+		Username string `json:"username"`
+		Password string `json:"password"`
+		Proxy    string `json:"proxy"`
 	} `json:"accounts"`
 	Debug bool `json:"debug"`
 }
@@ -42,14 +36,8 @@ func main() {
 		MaxBackups: 3,
 		MaxAge:     1, //days
 	})
-	if Mode != "development" {
-		id, err := machineid.ProtectedID("margonem-mobile-app-bot")
-		if err != nil {
-			logrus.Fatal(err)
-		}
-		if id != MachineID {
-			logrus.Fatal(fmt.Errorf("Wrong machine id"))
-		}
+	if err := utils.CheckMachineID(MachineID); err != nil {
+		logrus.Fatal(err)
 	}
 	dat, err := ioutil.ReadFile(basePath + "config.json")
 	if err != nil {
