@@ -116,18 +116,19 @@ func (cj *cronJob) handler() {
 		}
 		if len(account.Characters) > 0 {
 			wg.Add(1)
+			count++
+			acc := account
 			go func() {
 				defer wg.Done()
-				count++
 				conn, err := margonem.Connect(&margonem.Config{
-					Username: account.Username,
-					Password: account.Password,
-					Proxy:    account.Proxy,
+					Username: acc.Username,
+					Password: acc.Password,
+					Proxy:    acc.Proxy,
 				})
 				if err != nil {
 					return
 				}
-				for _, char := range account.Characters {
+				for _, char := range acc.Characters {
 					entry := logrus.WithField("charid", char.ID).WithField("mapid", char.MapID)
 					entry.Info("Running cron job")
 					time.Sleep(time.Duration(utils.Random(200, 400)) * time.Millisecond)
