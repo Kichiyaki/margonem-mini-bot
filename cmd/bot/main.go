@@ -115,8 +115,8 @@ func (cj *cronJob) handler() {
 			count = 0
 		}
 		if len(account.Characters) > 0 {
+			wg.Add(1)
 			go func() {
-				wg.Add(1)
 				defer wg.Done()
 				count++
 				conn, err := margonem.Connect(&margonem.Config{
