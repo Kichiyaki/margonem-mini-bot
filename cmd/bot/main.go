@@ -85,7 +85,7 @@ func main() {
 }
 
 func cronFunc(cfg *config) func() {
-	running := true
+	running := false
 	return func() {
 		if running {
 			return
