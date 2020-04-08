@@ -77,7 +77,7 @@ func main() {
 	c.AddFunc("* * * * *", cJob.handler)
 	c.Start()
 	defer c.Stop()
-	cJob.handler()
+	go cJob.handler()
 	log.Print("Uruchomiono bota.")
 
 	channel := make(chan os.Signal, 1)
