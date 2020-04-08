@@ -42,7 +42,7 @@ type serverResponse struct {
 	E           string `json:"e"`
 	MobileToken string `json:"mobile_token"`
 	Character   struct {
-		Stamina int `json:"stamina"`
+		Stamina *int `json:"stamina"`
 		Stats   struct {
 			HP    *int `json:"hp"`
 			MaxHP *int `json:"maxhp"`
@@ -54,6 +54,13 @@ type serverResponse struct {
 		Source string         `json:"source"`
 		States map[string]int `json:"states"`
 	} `json:"loot"`
+}
+
+func (c *serverConnection) canSendAttack(mapid string) bool {
+	if m, ok := c.maps[mapid]; ok {
+		return c.stamina >= m.StaminaCostFight
+	}
+	return false
 }
 
 func (c *serverConnection) close() {
@@ -70,7 +77,7 @@ func (c *serverConnection) handleOnRequest(req *colly.Request) {
 	urlValues := req.URL.Query()
 	if _, ok := urlValues["ev"]; ok {
 		urlValues["ev"] = []string{
-			fmt.Sprintf("%f", float64(time.Now().Unix())),
+			fmt.Sprintf("%f", float64(time.Now().UnixNano())/1000000000),
 		}
 		req.URL.RawQuery = urlValues.Encode()
 	}
@@ -107,7 +114,7 @@ func (c *serverConnection) init() error {
 		if initLvl == "1" {
 			c.mobileToken = resp.MobileToken
 			c.mobileTokenMD5 = hash(mobileTokenSalt + c.mobileToken)
-			c.stamina = resp.Character.Stamina
+			c.stamina = *resp.Character.Stamina
 			c.hp = *resp.Character.Stats.HP
 			c.maxhp = *resp.Character.Stats.MaxHP
 		} else if initLvl == "2" {
@@ -142,9 +149,44 @@ func (c *serverConnection) init() error {
 		}
 	}
 
-	go c.keepAlive()
+	return c.sendSingleEvent()
+}
 
-	return nil
+func (c *serverConnection) sendSingleEvent() error {
+	var firstErr error
+	collector := c.collector.Clone()
+	hdr := c.headers.Clone()
+
+	collector.OnRequest(c.handleOnRequest)
+	collector.OnResponse(func(res *colly.Response) {
+		if firstErr != nil {
+			return
+		}
+		resp := &serverResponse{}
+		if err := json.Unmarshal(res.Body, resp); err != nil {
+			firstErr = fmt.Errorf("sendSingleEvent: %s", err.Error())
+			return
+		}
+		if firstErr = c.handleResponse(resp); firstErr != nil {
+			return
+		}
+	})
+	collector.OnError(func(res *colly.Response, err error) {
+		if firstErr != nil {
+			return
+		}
+		firstErr = fmt.Errorf("sendSingleEvent: %s", err.Error())
+	})
+
+	if err := collector.Request("POST",
+		fmt.Sprintf(eventURL, c.server, "_", c.userID, c.mobileTokenMD5),
+		nil,
+		nil,
+		hdr); err != nil {
+		return fmt.Errorf("sendSingleEvent: %s", err.Error())
+	}
+	collector.Wait()
+	return firstErr
 }
 
 func (c *serverConnection) heal() error {
@@ -164,6 +206,7 @@ func (c *serverConnection) heal() error {
 		if firstErr = c.handleResponse(resp); firstErr != nil {
 			return
 		}
+
 	})
 	collector.OnError(func(res *colly.Response, err error) {
 		if firstErr != nil {
@@ -254,7 +297,7 @@ func (c *serverConnection) attack(mapID string) error {
 		}
 		firstErr = fmt.Errorf("attack: %s", err.Error())
 	})
-	for _, add := range []string{
+	for i, add := range []string{
 		fmt.Sprintf("&a=attack&town_id=%s", mapID),
 		"&a=f",
 		"&a=quit",
@@ -274,9 +317,12 @@ func (c *serverConnection) attack(mapID string) error {
 		if firstErr != nil {
 			return firstErr
 		}
+		if i == 1 {
+			time.Sleep(1500)
+		}
 	}
 
-	return nil
+	return c.sendSingleEvent()
 }
 
 func (c *serverConnection) getHealRequestURL(itemID string) string {
@@ -285,58 +331,6 @@ func (c *serverConnection) getHealRequestURL(itemID string) string {
 		fmt.Sprintf("moveitem&id=%s&st=1", itemID),
 		c.userID,
 		c.mobileTokenMD5)
-}
-
-func (c *serverConnection) keepAlive() {
-	var firstErr error
-	ticker := time.NewTicker(1500 * time.Millisecond)
-	defer ticker.Stop()
-	collector := c.collector.Clone()
-	hdr := c.headers.Clone()
-
-	collector.OnRequest(c.handleOnRequest)
-	collector.OnResponse(func(res *colly.Response) {
-		if firstErr != nil {
-			return
-		}
-		resp := &serverResponse{}
-		if err := json.Unmarshal(res.Body, resp); err != nil {
-			firstErr = fmt.Errorf("keepAlive: %s", err.Error())
-			return
-		}
-		fmt.Println("\n\n", "keepAlive", string(res.Body), "\n\n")
-		if firstErr = c.handleResponse(resp); firstErr != nil {
-			return
-		}
-	})
-	collector.OnError(func(res *colly.Response, err error) {
-		if firstErr != nil {
-			return
-		}
-		firstErr = fmt.Errorf("keepAlive: %s", err.Error())
-	})
-
-	for {
-		select {
-		case <-c.ctx.Done():
-			return
-		case <-ticker.C:
-			if err := collector.Request("POST",
-				fmt.Sprintf(eventURL, c.server, "_", c.userID, c.mobileTokenMD5),
-				nil,
-				nil,
-				hdr); err != nil {
-				return
-			}
-			collector.Wait()
-			if firstErr != nil {
-				if strings.Contains(firstErr.Error(), "Sesja gry wygasła") {
-					go c.init()
-				}
-				return
-			}
-		}
-	}
 }
 
 func (c *serverConnection) handleLoot(res *serverResponse) error {
@@ -349,7 +343,6 @@ func (c *serverConnection) handleLoot(res *serverResponse) error {
 		if firstErr != nil {
 			return
 		}
-		fmt.Println("\n\n", "handleLoot", string(res.Body), "\n\n")
 		resp := &serverResponse{}
 		if err := json.Unmarshal(res.Body, resp); err != nil {
 			firstErr = fmt.Errorf("handleLoot: %s", err.Error())
@@ -406,9 +399,8 @@ func (c *serverConnection) handleResponse(res *serverResponse) error {
 	}
 
 	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	if res.Character.Stamina != 0 {
-		c.stamina = res.Character.Stamina
+	if res.Character.Stamina != nil {
+		c.stamina = *res.Character.Stamina
 	}
 
 	if res.Character.Stats.HP != nil {
@@ -418,9 +410,11 @@ func (c *serverConnection) handleResponse(res *serverResponse) error {
 	if res.Character.Stats.MaxHP != nil {
 		c.maxhp = *res.Character.Stats.MaxHP
 	}
-
+	c.mutex.Unlock()
 	if res.Loot.Source == "fight" {
-		go c.handleLoot(res)
+		if err := c.handleLoot(res); err != nil {
+			return err
+		}
 	}
 
 	return nil

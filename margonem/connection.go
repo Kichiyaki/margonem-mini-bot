@@ -1,6 +1,7 @@
 package margonem
 
 import (
+	"bot/colly/debug"
 	_extensions "bot/colly/extensions"
 	"bytes"
 	"encoding/json"
@@ -8,18 +9,32 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/gocolly/colly/v2/proxy"
 
 	"github.com/gocolly/colly/v2"
-	"github.com/gocolly/colly/v2/debug"
+)
+
+const (
+	appVersion       = "1.3.6"
+	baseURL          = "http://www.margonem.pl"
+	loginURL         = "https://new.margonem.pl/ajax/login"
+	getPlayerDataURL = "http://www.margonem.pl/ajax/getplayerdata.php?app_version=%s"
+)
+
+var (
+	_logrus = logrus.WithField("package", "margonem")
 )
 
 type Connection interface {
 	Charlist() []*Character
 	UseWholeStamina(charid string, mapid string) error
+	UserID() string
 }
 
 type connection struct {
@@ -38,28 +53,27 @@ type Config struct {
 	Proxy    string
 }
 
-const (
-	appVersion       = "1.3.6"
-	baseURL          = "http://www.margonem.pl"
-	loginURL         = "https://new.margonem.pl/ajax/login"
-	getPlayerDataURL = "http://www.margonem.pl/ajax/getplayerdata.php?app_version=%s"
-)
-
 func Connect(cfg *Config) (Connection, error) {
+	entry := _logrus.WithField("cfg", cfg)
+	entry.Debug("Connect called")
 	c := &connection{
 		username: cfg.Username,
 		password: cfg.Password,
 		proxy:    cfg.Proxy,
 	}
 	if err := c.init(); err != nil {
+		entry.Debugf("Connect err: %s", err.Error())
 		return nil, err
 	}
 	if err := c.login(); err != nil {
+		entry.Debugf("Connect err: %s", err.Error())
 		return nil, err
 	}
 	if err := c.getPlayerData(); err != nil {
+		entry.Debugf("Connect err: %s", err.Error())
 		return nil, err
 	}
+	entry.Debug("Connect finished")
 	return c, nil
 }
 
@@ -78,14 +92,12 @@ func (c *connection) UserID() string {
 }
 
 func (c *connection) UseWholeStamina(charid string, mapid string) error {
-	var character *Character
-	for _, ch := range c.charlist {
-		if ch.ID == charid {
-			character = ch
-		}
-	}
-	if character == nil {
-		return fmt.Errorf("SelectCharacter: Cannot find a character with id %s", charid)
+	entry := _logrus.WithField("charid", charid).WithField("mapid", mapid)
+	entry.Debug("UseWholeStamina called")
+	character, err := c.findCharacterByID(charid)
+	if err != nil {
+		entry.Debugf("UseWholeStamina err: %s", err.Error())
+		return err
 	}
 	serverConn := &serverConnection{
 		collector: c.collector.Clone(),
@@ -95,21 +107,47 @@ func (c *connection) UseWholeStamina(charid string, mapid string) error {
 		server:    character.Server(),
 	}
 	if err := serverConn.init(); err != nil {
+		entry.Debugf("UseWholeStamina err: %s", err.Error())
 		return err
 	}
-	if err := serverConn.attack(mapid); err != nil {
-		return err
-	}
-	if err := serverConn.heal(); err != nil {
-		return err
+	for serverConn.canSendAttack(mapid) {
+		if err := serverConn.attack(mapid); err != nil {
+			entry.Debugf("UseWholeStamina err: %s", err.Error())
+			return err
+		}
+		if err := serverConn.heal(); err != nil {
+			entry.Debugf("UseWholeStamina err: %s", err.Error())
+			return err
+		}
 	}
 	serverConn.close()
+
+	entry.Debug("UseWholeStamina finished")
+
 	return nil
+}
+
+func (c *connection) findCharacterByID(charid string) (*Character, error) {
+	var character *Character
+	err := fmt.Errorf("findCharacterByID: Cannot find a character with id %s", charid)
+	splitted := strings.Split(charid, "#")
+	if len(splitted) != 2 {
+		return nil, err
+	}
+	for _, ch := range c.charlist {
+		if ch.ID == splitted[1] && ch.Server() == splitted[0] {
+			character = ch
+		}
+	}
+	if character == nil {
+		return nil, err
+	}
+	return character, nil
 }
 
 func (c *connection) init() error {
 	c.collector = colly.NewCollector(
-		colly.Debugger(&debug.LogDebugger{}),
+		colly.Debugger(&debug.LogrusDebugger{}),
 		colly.Async(true),
 		colly.AllowURLRevisit(),
 	)
@@ -131,7 +169,7 @@ func (c *connection) init() error {
 	c.collector.Limit(&colly.LimitRule{
 		DomainGlob:  "*",
 		Parallelism: 1,
-		Delay:       1500 * time.Millisecond,
+		Delay:       500 * time.Millisecond,
 	})
 
 	c.headers = http.Header{}

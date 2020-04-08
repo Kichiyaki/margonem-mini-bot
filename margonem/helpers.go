@@ -28,12 +28,6 @@ func generateMucka() float32 {
 	return r1.Float32()
 }
 
-func random(min, max int) int {
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	return r1.Intn(max-min) + min
-}
-
 func parseStatStr(stat string, fields ...string) (map[string]int, error) {
 	m := make(map[string]int)
 	for _, s := range strings.Split(stat, ";") {
@@ -41,7 +35,6 @@ func parseStatStr(stat string, fields ...string) (map[string]int, error) {
 			if strings.Contains(s, f) {
 				val, err := strconv.Atoi(strings.Split(s, "=")[1])
 				if err != nil {
-					fmt.Println(s, val)
 					return nil, fmt.Errorf("parseStatStr: %s", err.Error())
 				}
 				m[f] = val
