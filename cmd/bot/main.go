@@ -70,7 +70,30 @@ func main() {
 
 	c := cron.New(cron.WithChain(
 		cron.SkipIfStillRunning(cron.VerbosePrintfLogger(log.New(os.Stdout, "cron: ", log.LstdFlags)))))
-	c.AddFunc("5 * * * *", func() {
+	cFunc := cronFunc(cfg)
+	c.AddFunc("* * * * *", cFunc)
+	c.Start()
+	defer c.Stop()
+	cFunc()
+	log.Print("Uruchomiono bota.")
+
+	channel := make(chan os.Signal, 1)
+	signal.Notify(channel, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGINT)
+	<-channel
+
+	os.Exit(0)
+}
+
+func cronFunc(cfg *config) func() {
+	running := true
+	return func() {
+		if running {
+			return
+		}
+		running = true
+		defer func() {
+			running = false
+		}()
 		var wg sync.WaitGroup
 		limit := runtime.NumCPU() * 10
 		count := 0
@@ -104,14 +127,5 @@ func main() {
 		}
 
 		wg.Wait()
-	})
-	c.Start()
-	defer c.Stop()
-	log.Print("Uruchomiono bota.")
-
-	channel := make(chan os.Signal, 1)
-	signal.Notify(channel, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGINT)
-	<-channel
-
-	os.Exit(0)
+	}
 }
