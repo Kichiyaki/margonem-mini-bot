@@ -34,6 +34,12 @@ Przykładowy plik konfiguracyjny.
 
 **2. Skąd wziąć ID postaci?** - Wejdź do gry interesującą cię postacią w przeglądarce, włącz narzędzia dla developerów (na google znajdziecie poradnik jak), przejdź do konsoli i wpisz window.hero.id, enter.
 
+Pojawiły Ci się w głowie jeszcze jakieś inne pytania? Proszę je kierować [tutaj](https://github.com/Kichiyaki/margonem-mini-bot/issues).
+
+## Błędy
+
+Znalazłeś jakiś błąd? Zgłoś go [tutaj](https://github.com/Kichiyaki/margonem-mini-bot/issues).
+
 ## Development
 
 **UWAGA!** setup jest przygotowany tylko pod windowsa.
@@ -55,11 +61,7 @@ Przykładowy plik konfiguracyjny.
 1. Przejdź do odpowiedniego folderu w Cmderze/command prompcie/innym emulatorze konsoli/eksploratorze plików.
 2. Uruchom plik build_windows.bat.
 
-## Błędy
-
-Znalazłeś jakiś błąd? Zgłoś go [tutaj](https://github.com/Kichiyaki/gqlgen-nextjs-postgres-starter/issues).
-
-**Built with**
+## Built with
 
 - [colly](https://github.com/gocolly/colly) - Used to make HTTP requests to Margonem Mini API.
 - [robfig/cron](https://github.com/robfig/cron) - Used to perform scheduled tasks.
