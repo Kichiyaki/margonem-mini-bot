@@ -70,11 +70,14 @@ func main() {
 
 	c := cron.New(cron.WithChain(
 		cron.SkipIfStillRunning(cron.VerbosePrintfLogger(log.New(os.Stdout, "cron: ", log.LstdFlags)))))
-	cFunc := cronFunc(cfg)
-	c.AddFunc("* * * * *", cFunc)
+	cJob := &cronJob{
+		running: false,
+		cfg:     cfg,
+	}
+	c.AddFunc("* * * * *", cJob.handler)
 	c.Start()
 	defer c.Stop()
-	cFunc()
+	cJob.handler()
 	log.Print("Uruchomiono bota.")
 
 	channel := make(chan os.Signal, 1)
@@ -84,48 +87,56 @@ func main() {
 	os.Exit(0)
 }
 
-func cronFunc(cfg *config) func() {
-	running := false
-	return func() {
-		if running {
-			return
-		}
-		running = true
-		defer func() {
-			running = false
-		}()
-		var wg sync.WaitGroup
-		limit := runtime.NumCPU() * 10
-		count := 0
-		for _, account := range cfg.Accounts {
-			if count >= limit {
-				wg.Wait()
-				count = 0
-			}
-			if len(account.Characters) > 0 {
-				go func() {
-					wg.Add(1)
-					defer wg.Done()
-					count++
-					conn, err := margonem.Connect(&margonem.Config{
-						Username: account.Username,
-						Password: account.Password,
-						Proxy:    account.Proxy,
-					})
-					if err != nil {
-						return
-					}
-					for _, char := range account.Characters {
-						entry := logrus.WithField("charid", char.ID).WithField("mapid", char.MapID)
-						entry.Info("Running cron job")
-						time.Sleep(time.Duration(utils.Random(200, 400)) * time.Millisecond)
-						err := conn.UseWholeStamina(char.ID, char.MapID)
-						entry.WithField("err", err).Info("Finished cron job")
-					}
-				}()
-			}
-		}
+type cronJob struct {
+	mutex   sync.Mutex
+	running bool
+	cfg     *config
+}
 
-		wg.Wait()
+func (cj *cronJob) handler() {
+	if cj.running {
+		return
 	}
+	cj.mutex.Lock()
+	cj.running = true
+	cj.mutex.Unlock()
+	defer func() {
+		cj.mutex.Lock()
+		cj.running = false
+		cj.mutex.Unlock()
+	}()
+
+	var wg sync.WaitGroup
+	limit := runtime.NumCPU() * 10
+	count := 0
+	for _, account := range cj.cfg.Accounts {
+		if count >= limit {
+			wg.Wait()
+			count = 0
+		}
+		if len(account.Characters) > 0 {
+			go func() {
+				wg.Add(1)
+				defer wg.Done()
+				count++
+				conn, err := margonem.Connect(&margonem.Config{
+					Username: account.Username,
+					Password: account.Password,
+					Proxy:    account.Proxy,
+				})
+				if err != nil {
+					return
+				}
+				for _, char := range account.Characters {
+					entry := logrus.WithField("charid", char.ID).WithField("mapid", char.MapID)
+					entry.Info("Running cron job")
+					time.Sleep(time.Duration(utils.Random(200, 400)) * time.Millisecond)
+					err := conn.UseWholeStamina(char.ID, char.MapID)
+					entry.WithField("err", err).Info("Finished cron job")
+				}
+			}()
+		}
+	}
+
+	wg.Wait()
 }
