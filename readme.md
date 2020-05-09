@@ -6,7 +6,7 @@ Zbudowaną aplikację można pobrać [stąd](https://dawid-wysokinski.pl/upload/
 
 Przykładowy plik konfiguracyjny.
 
-```
+```json
 {
   "accounts": [
     {
@@ -27,7 +27,6 @@ Przykładowy plik konfiguracyjny.
   ],
   "debug": false
 }
-
 ```
 
 ## Pytania
