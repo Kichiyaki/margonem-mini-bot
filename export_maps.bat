@@ -1,4 +1,3 @@
 @echo off
 IF NOT EXIST "config.json" COPY "default_config.json" "config.json"
-cd ./cmd/maps_exporter
-go run main.go
+go run ./cmd/maps_exporter/main.go

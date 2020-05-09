@@ -2,7 +2,7 @@
 
 **NIE ODPOWIADAM ZA WSZELKIE BANY!**
 
-Zbudowaną aplikację można pobrać [stąd](http://dawid-wysokinski.pl/upload/margonem-mini-bot.rar).
+Zbudowaną aplikację można pobrać [stąd](https://dawid-wysokinski.pl/upload/margonem-mini-bot.rar).
 
 Przykładowy plik konfiguracyjny.
 

@@ -1,7 +1,6 @@
 package margonem
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -32,8 +31,6 @@ type serverConnection struct {
 	stamina        int
 	maps           map[string]*Map
 	items          map[string]*Item
-	ctx            context.Context
-	cancel         context.CancelFunc
 }
 
 type serverResponse struct {
@@ -63,11 +60,7 @@ func (c *serverConnection) canSendAttack(mapid string) bool {
 	return false
 }
 
-func (c *serverConnection) close() {
-	c.cancel()
-}
-
-func (c *serverConnection) handleOnRequest(req *colly.Request) {
+func (c *serverConnection) handleNewRequest(req *colly.Request) {
 	cookie := &http.Cookie{
 		Value:  c.charID,
 		Name:   "mchar_id",
@@ -85,10 +78,9 @@ func (c *serverConnection) handleOnRequest(req *colly.Request) {
 
 func (c *serverConnection) init() error {
 	var firstErr error
-	c.ctx, c.cancel = context.WithCancel(context.Background())
 	mucka := generateMucka()
 	collector := c.collector.Clone()
-	collector.OnRequest(c.handleOnRequest)
+	collector.OnRequest(c.handleNewRequest)
 	collector.OnResponse(func(res *colly.Response) {
 		if firstErr != nil {
 			return
@@ -157,7 +149,7 @@ func (c *serverConnection) sendSingleEvent() error {
 	collector := c.collector.Clone()
 	hdr := c.headers.Clone()
 
-	collector.OnRequest(c.handleOnRequest)
+	collector.OnRequest(c.handleNewRequest)
 	collector.OnResponse(func(res *colly.Response) {
 		if firstErr != nil {
 			return
@@ -196,7 +188,7 @@ func (c *serverConnection) heal() error {
 	var firstErr error
 	collector := c.collector.Clone()
 	hdr := c.headers.Clone()
-	collector.OnRequest(c.handleOnRequest)
+	collector.OnRequest(c.handleNewRequest)
 	collector.OnResponse(func(res *colly.Response) {
 		resp := &serverResponse{}
 		if err := json.Unmarshal(res.Body, resp); err != nil {
@@ -280,7 +272,7 @@ func (c *serverConnection) attack(mapID string) error {
 	var firstErr error
 	collector := c.collector.Clone()
 	hdr := c.headers.Clone()
-	collector.OnRequest(c.handleOnRequest)
+	collector.OnRequest(c.handleNewRequest)
 	collector.OnResponse(func(res *colly.Response) {
 		resp := &serverResponse{}
 		if err := json.Unmarshal(res.Body, resp); err != nil {
@@ -338,7 +330,7 @@ func (c *serverConnection) handleLoot(res *serverResponse) error {
 	collector := c.collector.Clone()
 	hdr := c.headers.Clone()
 
-	collector.OnRequest(c.handleOnRequest)
+	collector.OnRequest(c.handleNewRequest)
 	collector.OnResponse(func(res *colly.Response) {
 		if firstErr != nil {
 			return

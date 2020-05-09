@@ -20,9 +20,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var Mode = "development"
-var MachineID = "*"
-
 type config struct {
 	Accounts []struct {
 		Username   string `json:"username"`
@@ -38,19 +35,12 @@ type config struct {
 
 func main() {
 	basePath := "./"
-	if Mode == "development" {
-		basePath = "./../../"
-	}
 	logrus.SetOutput(&lumberjack.Logger{
 		Filename:   basePath + "logs/bot.log",
 		MaxSize:    5, // megabytes
 		MaxBackups: 3,
 		MaxAge:     1, //days
 	})
-
-	if err := utils.CheckMachineID(MachineID); err != nil {
-		logrus.Fatal(err)
-	}
 
 	dat, err := ioutil.ReadFile(basePath + "config.json")
 	if err != nil {
@@ -130,10 +120,10 @@ func (cj *cronJob) handler() {
 				}
 				for _, char := range acc.Characters {
 					entry := logrus.WithField("charid", char.ID).WithField("mapid", char.MapID)
-					entry.Info("Running cron job")
+					entry.Info("Performing a cron job")
 					time.Sleep(time.Duration(utils.Random(200, 400)) * time.Millisecond)
 					err := conn.UseWholeStamina(char.ID, char.MapID)
-					entry.WithField("err", err).Info("Finished cron job")
+					entry.WithField("err", err).Info("Performed a cron job")
 				}
 			}()
 		}

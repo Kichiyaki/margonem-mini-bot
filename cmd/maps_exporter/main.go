@@ -2,7 +2,6 @@ package main
 
 import (
 	"bot/margonem"
-	"bot/utils"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -12,9 +11,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 )
-
-var Mode = "development"
-var MachineID = "*"
 
 type config struct {
 	Accounts []struct {
@@ -27,18 +23,12 @@ type config struct {
 
 func main() {
 	basePath := "./"
-	if Mode == "development" {
-		basePath = "./../../"
-	}
 	logrus.SetOutput(&lumberjack.Logger{
 		Filename:   basePath + "logs/map_exporter.log",
 		MaxSize:    5, // megabytes
 		MaxBackups: 3,
 		MaxAge:     1, //days
 	})
-	if err := utils.CheckMachineID(MachineID); err != nil {
-		logrus.Fatal(err)
-	}
 	dat, err := ioutil.ReadFile(basePath + "config.json")
 	if err != nil {
 		logrus.Fatalf("Cannot load config file: %s", err)

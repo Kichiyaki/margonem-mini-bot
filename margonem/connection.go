@@ -93,6 +93,7 @@ func (c *connection) UserID() string {
 }
 
 func (c *connection) UseWholeStamina(charid string, mapid string) error {
+	charid = strings.ToLower(charid)
 	entry := _logrus.WithField("charid", charid).WithField("mapid", mapid)
 	entry.Debug("UseWholeStamina called")
 	character, err := c.findCharacterByID(charid)
@@ -121,7 +122,6 @@ func (c *connection) UseWholeStamina(charid string, mapid string) error {
 			return err
 		}
 	}
-	serverConn.close()
 
 	entry.Debug("UseWholeStamina finished")
 
@@ -143,7 +143,6 @@ func (c *connection) Maplist() (map[string]*Map, error) {
 		return nil, err
 	}
 	maps := serverConn.maps
-	serverConn.close()
 	_logrus.Debug("Maplist finished")
 	return maps, nil
 }
